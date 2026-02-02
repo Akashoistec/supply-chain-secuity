@@ -4,19 +4,19 @@ name: ci
 on:
   push:
     branches ["master"]
-  pull-request:
+  pull_request:
 
 
 jobs:
   build:
-    run-on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
-      _ name: checkout code
+      - name: checkout code
         uses: actions/checkout@v4
 
 
-      _ name: build placeholder
+      - name: build placeholder
         run: echo "ci is running"
 
       - name: Run SAST (semgrep)
