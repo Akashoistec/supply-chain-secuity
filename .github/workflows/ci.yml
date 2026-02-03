@@ -37,14 +37,21 @@ jobs:
         run: |
           docker build -t demo-app:ci .
 
-      - name: Scan container image (Trivy)
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          image-ref: demo-app:ci
-          format: table
-          severity: CRITICAL,HIGH
-          ignore-unfixed: true
-          exit-code: 0
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
+          echo "deb https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
+          sudo apt-get update
+          sudo apt-get install -y trivy
+      - name: Scan container image (Trivy CLI)
+        run: |
+          trivy image demo-app:ci \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --format table \
+            --exit-code 0
 
       - name: Generate SBOM (cycloneDX)
         run: |
