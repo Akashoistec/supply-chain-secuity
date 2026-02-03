@@ -107,4 +107,4 @@ jobs:
 
       - name: Sign image
         run: |
-          cosign sign --key cosign.key $DIGEST
+          cosign sign --key cosign.key ${{ steps.digest.outputs.digest }}
