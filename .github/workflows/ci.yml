@@ -92,7 +92,7 @@ jobs:
       - name: Resolve image digest
         id: digest
         run: |
-          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.image.outputs.image }}:ci)
+          DIGEST=$(docker inspect --format='{{index .RepoDigests 0}}' ${{ steps.image.outputs.image }}:${{ steps.image.outputs.tag }})
           echo "digest=$DIGEST" >> $GITHUB_OUTPUT
 
       # ---------------- COSIGN ----------------
