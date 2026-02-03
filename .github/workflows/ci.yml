@@ -38,8 +38,9 @@ jobs:
         id: image
         run: |
           IMAGE=910321623036.dkr.ecr.ap-south-1.amazonaws.com/demo-app
+          TAG=${GITHUB_SHA}
           echo "image=$IMAGE" >> $GITHUB_OUTPUT
-
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
       # ---------------- AWS OIDC ----------------
       - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
@@ -53,15 +54,16 @@ jobs:
       # ---------------- BUILD & PUSH ----------------
       - name: Build image
         run: |
-          docker build -t demo-app:ci .
+          docker build -t demo-app:${{ steps.image.outputs.tag }} .
 
       - name: Tag image
         run: |
-          docker tag demo-app:ci ${{ steps.image.outputs.image }}:ci
+          docker tag demo-app::${{ steps.image.outputs.tag }} \
+            ${{ steps.image.outputs.image }}:${{ steps.image.outputs.tag }}
 
       - name: Push image
         run: |
-          docker push ${{ steps.image.outputs.image }}:ci
+          docker push ${{ steps.image.outputs.image }}:${{ steps.image.outputs.tag }}
 
       # ---------------- INSTALL TRIVY ----------------
       - name: Install Trivy
@@ -74,7 +76,7 @@ jobs:
       # ---------------- IMAGE SCAN ----------------
       - name: Scan image (signal only)
         run: |
-          trivy image ${{ steps.image.outputs.image }}:ci \
+          trivy image ${{ steps.image.outputs.image }}:${{ steps.image.outputs.tag }} \
             --severity CRITICAL,HIGH \
             --ignore-unfixed \
             --exit-code 0
@@ -82,7 +84,7 @@ jobs:
       # ---------------- SBOM ----------------
       - name: Generate SBOM
         run: |
-          trivy image ${{ steps.image.outputs.image }}:ci \
+          trivy image ${{ steps.image.outputs.image }}:${{ steps.image.outputs.tag }} \
             --format cyclonedx \
             --output sbom.cdx.json
 
@@ -105,4 +107,4 @@ jobs:
 
       - name: Sign image
         run: |
-          cosign sign --key cosign.key ${{ steps.digest.outputs.digest }}
+          cosign sign --key cosign.key $DIGEST
