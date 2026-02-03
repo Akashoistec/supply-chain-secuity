@@ -32,19 +32,19 @@ jobs:
           ignore-unfixed: true
           severity: CRITICAL,HIGH
           exit-code: 0
-     
+
       - name: build container image
         run: |
           docker build -t demo-app:ci .
 
       - name: Install Trivy
         run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | sudo apt-key add -
-          echo "deb https://aquasecurity.github.io/trivy-repo/deb stable main" | sudo tee /etc/apt/sources.list.d/trivy.list
-          sudo apt-get update
-          sudo apt-get install -y trivy
+          TRIVY_VERSION=0.52.2
+          curl -sfL https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz -o trivy.tar.gz
+          tar -xzf trivy.tar.gz
+          sudo mv trivy /usr/local/bin/trivy
+          trivy --version
+
       - name: Scan container image (Trivy CLI)
         run: |
           trivy image demo-app:ci \
