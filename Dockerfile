@@ -20,3 +20,4 @@ RUN useradd -m appuser
 USER appuser
 
 CMD ["python", "-c", "print('container started')"]
+# noop
